@@ -55,7 +55,7 @@ class AttackClient(metaclass=Singleton):
 
         return attack
 
-    def get_all_attacks():
+    def get_all_attacks(self):
         url = f"{self.__HOST}{END_POINT}"
         print("GET  " + url + "\n")
         req = requests.get(url)
