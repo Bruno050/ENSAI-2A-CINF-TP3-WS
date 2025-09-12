@@ -17,7 +17,7 @@ These practical exercises will be useful as part of the IT project
 
 Install the required packages with the following bash commands :
 
-```bash*
+```bash
 pip install -r requirements.txt     # install all packages listed in the file
 pip list                            # to list all installed packages
 ```
