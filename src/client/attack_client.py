@@ -28,6 +28,7 @@ class AttackClient(metaclass=Singleton):
         :rtype: AbstractAttack
         """
         url = f"{self.__HOST}{END_POINT}/{id}"
+        print(f"{self.__HOST}{END_POINT}")
         print("GET  " + url + "\n")
         req = requests.get(url)
 
@@ -39,11 +40,32 @@ class AttackClient(metaclass=Singleton):
 
             print("Réponse JSON obtenue :\n" + json.dumps(raw_attack, indent=2) + "\n")
 
+            req = req.json()
+
+            name = req['name']
+            attack_type = req['attack_type']
+            power = req['power']
+            accuracy = req['accuracy']
+            element = req['element']
+            description = req['description']
+            id = req['id']
+
             # TODO
-            #   create an attack using the data contained in the json
-            #   see class AttackFactory to do this
+            attack = AttackFactory().instantiate_attack(attack_type, id, power, name, description, accuracy, element)
 
         return attack
+
+    def get_all_attacks():
+        url = f"{self.__HOST}{END_POINT}"
+        print("GET  " + url + "\n")
+        req = requests.get(url)
+
+        #list_attack = []
+
+        if req.status_code == 200:
+            #raw_attack = req.json()
+
+            pass
 
 
 # Execute Code When the File Runs as a Script
