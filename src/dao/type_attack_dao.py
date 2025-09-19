@@ -1,7 +1,7 @@
 from typing import List, Optional
 from dao.db_connection import DBConnection
 from utils.singleton import Singleton
-from business_object.attack.abstract_attack import AbstractAttack
+from business_object.attack.abstract_attack import AbstractAttack, AttackFactory
 
 
 class TypeAttackDAO(metaclass=Singleton):
@@ -57,39 +57,62 @@ class TypeAttackDAO(metaclass=Singleton):
         if res:
             return res["id_attack_type"]
 
-def find_attack_by_id(self, id: int) -> str | None:
-    """Return the attack name with the given ID or None if not found."""
-    
-    with DBConnection().connection as connection:
-        with connection.cursor(dictionary=True) as cursor:
-            cursor.execute(
-                "SELECT attack_name "
-                "FROM tp.attack "
-                "WHERE id_attack = %(id)s",
-                {"id": id} 
+    def find_attack_by_id(self, id: int) -> str | None:
+        """Return the attack name with the given ID or None if not found."""
+        
+        with DBConnection().connection as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(
+                    "SELECT attack_name "
+                    "FROM tp.attack "
+                    "WHERE id_attack = %(id)s",
+                    {"id": id} 
+                )
+                res = cursor.fetchone()
+
+        if res:
+            return res["attack_name"]
+        return None
+
+
+
+    def find_all_attacks(self, limit: int) -> List[AbstractAttack] | None:
+        """Return a list of all attacks, limited by 'limit'."""
+
+        with DBConnection().connection as connection:
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(
+                    """
+                    SELECT a.id_attack, a.power, a.attack_name, a.attack_description, 
+                        a.accuracy, a.element, att.attack_type_name
+                    FROM tp.attack a
+                    JOIN tp.attack_type_name att ON a.id_attack = at.id_attack
+                    LIMIT %(limit)s
+                    """,
+                    {"limit": limit}
+                )
+                rows = cursor.fetchall()
+
+        if not rows:
+            return None
+
+        res = [
+            AttackFactory().instantiate_attack(
+                a["attack_type_name"],
+                a["id_attack"],
+                a["power"],
+                a["attack_name"],
+                a["attack_description"],
+                a["accuracy"],
+                a["element"],
             )
-            res = cursor.fetchone()
+            for a in rows
+        ]
 
-    if res:
-        return res["attack_name"]
-    return None
-
-
-
-def find_all_attacks(self, limit: id) -> List[AbstractAttack]: #, float: offset):
-    """returns a list of all attacks"""
-
-    with DBConnection().coonection as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT * FROM tp.attack"
-                " LIMIT %(limit)s", {"limit" : limit}
-            )
-            res = cursor.fetchall()
-    if res:
-        print(5)
+        print(res[0])
+        print(type(res[0]))
         return res
-    return None
+
 
 
 if __name__ == "__main__":
@@ -103,4 +126,4 @@ if __name__ == "__main__":
 
     print(" --------- ------------- ---------------")
     all_attacks = TypeAttackDAO().find_all_attacks(5)
-    print(all_attacks)
+    #print(all_attacks)
