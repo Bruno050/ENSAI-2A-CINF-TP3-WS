@@ -1,6 +1,7 @@
 from typing import List, Optional
 from dao.db_connection import DBConnection
 from utils.singleton import Singleton
+from business_object.attack.abstract_attack import AbstractAttack
 
 
 class TypeAttackDAO(metaclass=Singleton):
@@ -56,6 +57,40 @@ class TypeAttackDAO(metaclass=Singleton):
         if res:
             return res["id_attack_type"]
 
+def find_attack_by_id(self, id: int) -> str | None:
+    """Return the attack name with the given ID or None if not found."""
+    
+    with DBConnection().connection as connection:
+        with connection.cursor(dictionary=True) as cursor:
+            cursor.execute(
+                "SELECT attack_name "
+                "FROM tp.attack "
+                "WHERE id_attack = %(id)s",
+                {"id": id} 
+            )
+            res = cursor.fetchone()
+
+    if res:
+        return res["attack_name"]
+    return None
+
+
+
+def find_all_attacks(self, limit: id) -> List[AbstractAttack]: #, float: offset):
+    """returns a list of all attacks"""
+
+    with DBConnection().coonection as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM tp.attack"
+                " LIMIT %(limit)s", {"limit" : limit}
+            )
+            res = cursor.fetchall()
+    if res:
+        print(5)
+        return res
+    return None
+
 
 if __name__ == "__main__":
     # Pour charger les variables d'environnement contenues dans le fichier .env
@@ -64,4 +99,8 @@ if __name__ == "__main__":
     dotenv.load_dotenv(override=True)
 
     attack_types = TypeAttackDAO().find_all_attack_type()
-    print(attack_types)
+    #print(attack_types)
+
+    print(" --------- ------------- ---------------")
+    all_attacks = TypeAttackDAO().find_all_attacks(5)
+    print(all_attacks)
